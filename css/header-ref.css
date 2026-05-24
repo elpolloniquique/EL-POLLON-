@@ -742,110 +742,211 @@ body.pollon-body {
   border-radius: 10px;
 }
 
-/* ===== MÓVIL ===== */
+/* ===== MÓVIL (<768px): barra roja sólida — referencia celular ===== */
+@media (max-width: 767px) {
+  :root {
+    --header-h-mobile: 56px;
+  }
+
+  .header-pollon__mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: var(--header-h-mobile);
+    padding: 0 0.45rem 0 0.4rem;
+    background: linear-gradient(180deg, #d00800 0%, var(--pollon-red) 42%, #b00500 100%);
+    overflow: visible;
+    box-shadow: var(--header-shadow);
+  }
+
+  .header-pollon__mobile::before {
+    display: none;
+  }
+
+  .header-mobile__brand {
+    background: transparent;
+    clip-path: none;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    z-index: 1;
+  }
+
+  .header-mobile__logo-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .header-mobile__logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--pollon-white);
+    border: none;
+    padding: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+
+  .header-mobile__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .header-mobile__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    line-height: 1.15;
+    gap: 1px;
+  }
+
+  .header-mobile__title {
+    color: var(--pollon-white);
+    font-family: 'Dancing Script', cursive;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    white-space: nowrap;
+  }
+
+  .header-mobile__sub {
+    color: rgba(255, 255, 255, 0.92);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.52rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .header-mobile__actions {
+    background: transparent;
+    clip-path: none;
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.02rem;
+    padding: 0;
+    flex-shrink: 0;
+    min-width: 0;
+    z-index: 1;
+  }
+
+  .header-mobile__icon-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--pollon-white);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+  }
+
+  .header-mobile__icon-btn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+    stroke: var(--pollon-white);
+  }
+
+  .header-mobile__icon-btn:active {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .header-mobile__cart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    border: none;
+    background: transparent;
+    color: var(--pollon-white);
+    padding: 0.2rem 0.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .header-mobile__cart-icon {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: var(--pollon-white);
+    flex-shrink: 0;
+  }
+
+  .header-mobile__cart-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 3px;
+    background: var(--pollon-white) !important;
+    color: #1a1a1a !important;
+    border-radius: 50%;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: none;
+    position: static;
+    pointer-events: none;
+  }
+
+  .header-mobile__separator {
+    display: block;
+    width: 1px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+    margin: 0 0.12rem 0 0.18rem;
+  }
+
+  .header-mobile__menu-btn {
+    margin-right: 0;
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-mobile__menu-btn .hamburger-lines {
+    width: 22px;
+    gap: 5px;
+  }
+}
+
+/* Base móvil: oculto en tablet+ (estilos visuales solo en max-width 767 arriba) */
 .header-pollon__mobile {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.35rem;
   min-height: var(--header-h-mobile);
-  padding: 0 0.5rem 0 0.35rem;
-  background: linear-gradient(135deg, var(--pollon-red) 0%, var(--pollon-red-dark) 100%);
-  position: relative;
-  box-shadow: var(--header-shadow);
 }
 
 .header-pollon__mobile::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(8px);
-  pointer-events: none;
+  display: none;
 }
 
 @media (min-width: 768px) {
   .header-pollon__mobile {
     display: none !important;
   }
-}
-
-.header-logo-mobile {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  justify-content: center;
-  min-width: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.header-pollon__mobile .header-hamburger-btn {
-  flex-shrink: 0;
-}
-
-.header-logo-mobile .logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--pollon-white);
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  padding: 3px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.header-pollon__mobile .header-actions-mobile {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.header-pollon__mobile .header-icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  color: var(--pollon-white);
-  background: transparent;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.2s, transform 0.2s;
-  position: relative;
-  padding: 0;
-}
-
-.header-pollon__mobile .header-icon-cart {
-  margin-right: 2px;
-}
-
-.header-cart-badge {
-  position: absolute;
-  top: 4px;
-  right: 2px;
-  min-width: 17px;
-  height: 17px;
-  padding: 0 4px;
-  font-size: 0.62rem;
-  font-weight: 800;
-  line-height: 17px;
-  text-align: center;
-  background: var(--pollon-white) !important;
-  color: var(--pollon-red) !important;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  pointer-events: none;
-}
-
-.header-pollon__mobile .header-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.05);
 }
 
 /* Hamburger animado */
@@ -1613,14 +1714,22 @@ body.pollon-body {
 }
 
 @media (max-width: 480px) {
-  .header-pollon__mobile .header-icon-btn {
+  .header-mobile__logo {
     width: 38px;
     height: 38px;
   }
 
-  .header-logo-mobile .logo {
-    width: 38px;
-    height: 38px;
+  .header-mobile__title {
+    font-size: 1.05rem;
+  }
+
+  .header-mobile__sub {
+    font-size: 0.48rem;
+  }
+
+  .header-mobile__icon-btn {
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -1628,35 +1737,39 @@ body.pollon-body {
   :root {
     --header-h-mobile: 54px;
   }
-
-  .header-pollon__mobile {
-    padding: 0 0.4rem 0 0.25rem;
-  }
 }
 
 @media (max-width: 390px) {
-  .header-pollon__mobile .header-icon-btn {
-    width: 36px;
-    height: 36px;
-  }
-
-  .header-pollon__mobile .header-icon-btn svg {
+  .header-mobile__icon-btn svg {
     width: 18px;
     height: 18px;
+  }
+
+  .header-mobile__cart-icon {
+    width: 18px !important;
+    height: 18px !important;
   }
 }
 
 @media (max-width: 375px) {
-  .header-logo-mobile .logo {
+  .header-mobile__logo {
     width: 36px;
     height: 36px;
+  }
+
+  .header-mobile__title {
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 360px) {
-  .header-pollon__mobile .header-icon-btn {
-    width: 34px;
-    height: 34px;
+  .header-mobile__icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .header-pollon__mobile {
+    padding-right: 0.3rem;
   }
 }
 
@@ -1665,27 +1778,15 @@ body.pollon-body {
     --header-h-mobile: 52px;
   }
 
-  .header-pollon__mobile {
-    padding: 0 0.2rem;
+  .header-mobile__sub {
+    font-size: 0.44rem;
+    letter-spacing: 0.1em;
   }
 
-  .header-pollon__mobile .header-icon-btn {
-    width: 32px;
-    height: 32px;
-  }
-
-  .header-logo-mobile .logo {
-    width: 34px;
-    height: 34px;
-  }
-
-  .header-cart-badge {
-    min-width: 15px;
-    height: 15px;
-    font-size: 0.58rem;
-    line-height: 15px;
-    top: 2px;
-    right: 0;
+  .header-mobile__cart-badge {
+    min-width: 1rem;
+    height: 1rem;
+    font-size: 0.55rem;
   }
 }
 
