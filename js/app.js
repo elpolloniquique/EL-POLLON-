@@ -332,6 +332,9 @@ function updateCartUI() {
   if (mb) mb.textContent = c;
   if (db) db.textContent = c;
 
+  const mbb = document.getElementById('cart-badge-mobile-bar');
+  if (mbb) mbb.textContent = c;
+
   const ddBadge = document.getElementById('menu-dd-cart-badge');
   if (ddBadge) ddBadge.textContent = c;
 
@@ -1155,16 +1158,22 @@ const menuOpenDesktop = document.getElementById('menu-open-desktop');
 function openSidebar() {
   if (sidebarMenu) sidebarMenu.style.transform = 'translateX(0)';
   if (sidebarOverlay) sidebarOverlay.classList.remove('hidden');
+  if (hamburgerBtn) hamburgerBtn.setAttribute('aria-expanded', 'true');
   document.body.style.overflow = 'hidden';
 }
 function closeSidebarMenu() {
   if (sidebarMenu) sidebarMenu.style.transform = 'translateX(-100%)';
   if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
+  if (hamburgerBtn) hamburgerBtn.setAttribute('aria-expanded', 'false');
   document.body.style.overflow = 'auto';
 }
 if (hamburgerBtn) hamburgerBtn.addEventListener('click', openSidebar);
 if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarMenu);
 if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarMenu);
+
+document.querySelectorAll('.sidebar-nav-item[href="#menu"]').forEach(link => {
+  link.addEventListener('click', closeSidebarMenu);
+});
 
 document.querySelectorAll('.sidebar-category').forEach(btn => {
   btn.addEventListener('click', () => {
