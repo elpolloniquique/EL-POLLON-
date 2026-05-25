@@ -2,7 +2,9 @@
 
 Plataforma web de pedidos (delivery, reservas, retiros) con panel de administración y backend **Supabase**.
 
-**Sitio en producción:** [elpolloniquique.github.io/EL-POLLON-/](https://elpolloniquique.github.io/EL-POLLON-/)
+**Sitio en producción:** [elpolloniquique.github.io/El-Pollon-Iquique_Delivery-/](https://elpolloniquique.github.io/El-Pollon-Iquique_Delivery-/)
+
+**Indexar en Google (paso a paso):** ver [GUIA-INDEXAR-EN-GOOGLE.md](./GUIA-INDEXAR-EN-GOOGLE.md)
 
 ## Inicio rápido
 
