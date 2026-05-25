@@ -12,6 +12,8 @@
   let _knownOrderIds = new Set();
   let _ordersAlarmReady = false;
 
+  const REPARTIDORES = ['Eduardo', 'Antony', 'Mauriflax', 'JDN'];
+
   const NAV = [
     { id: 'dashboard', label: '📊 Dashboard', perm: 'dashboard', title: 'Dashboard' },
     { id: 'pedidos', label: '🛒 Pedidos', perm: 'orders', title: 'Pedidos' },
@@ -60,17 +62,60 @@
     }
   }
 
+  function parseTimeToMinutes(timeStr) {
+    if (!timeStr) return null;
+    const parts = timeStr.split(':');
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) || 0;
+    if (Number.isNaN(h)) return null;
+    return h * 60 + m;
+  }
+
+  function orderTimeMinutes(iso) {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.getHours() * 60 + d.getMinutes();
+  }
+
+  function orderMatchesHourRange(createdAt, horaDesde, horaHasta) {
+    if (!horaDesde && !horaHasta) return true;
+    const mins = orderTimeMinutes(createdAt);
+    if (mins === null) return false;
+    const from = parseTimeToMinutes(horaDesde) ?? 0;
+    const to = parseTimeToMinutes(horaHasta) ?? 24 * 60 - 1;
+    if (from <= to) return mins >= from && mins <= to;
+    return mins >= from || mins <= to;
+  }
+
+  function getRepartidor(o) {
+    return (o.repartidor || '').trim();
+  }
+
+  function repartidorSelectHtml(orderId, current) {
+    const cur = current || '';
+    const opts = ['<option value="">— Sin asignar —</option>']
+      .concat(REPARTIDORES.map(r =>
+        `<option value="${r}"${cur === r ? ' selected' : ''}>${r}</option>`
+      ));
+    return `<select class="admin-repartidor-select" data-repartidor-id="${orderId}" aria-label="Asignar repartidor">${opts.join('')}</select>`;
+  }
+
   function filterPedidos() {
     const desde = document.getElementById('filtro-desde')?.value;
     const hasta = document.getElementById('filtro-hasta')?.value;
+    const horaDesde = document.getElementById('filtro-hora-desde')?.value;
+    const horaHasta = document.getElementById('filtro-hora-hasta')?.value;
     const estado = document.getElementById('filtro-estado')?.value;
+    const repartidor = document.getElementById('filtro-repartidor')?.value;
     const q = (document.getElementById('filtro-buscar')?.value || '').toLowerCase();
     return orders.filter(o => {
       const d = (o.createdAt || '').substring(0, 10);
       if (desde && d < desde) return false;
       if (hasta && d > hasta) return false;
+      if (!orderMatchesHourRange(o.createdAt, horaDesde, horaHasta)) return false;
       const est = o.estado || U.estadoFromLegacy(o.status);
       if (estado && est !== estado) return false;
+      if (repartidor && getRepartidor(o) !== repartidor) return false;
       if (q) {
         const n = (o.customer?.name || '').toLowerCase();
         const t = (o.customer?.phone || '').toLowerCase();
@@ -80,12 +125,29 @@
     }).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   }
 
+  function updateRepartidorResumen(list) {
+    const box = document.getElementById('repartidor-resumen');
+    const sel = document.getElementById('filtro-repartidor')?.value;
+    if (!box) return;
+    if (!sel) {
+      box.classList.add('hidden');
+      return;
+    }
+    const cantidad = list.length;
+    const total = list.reduce((s, o) => s + (Number(o.total) || 0), 0);
+    document.getElementById('resumen-repartidor-nombre').textContent = sel;
+    document.getElementById('resumen-repartidor-cantidad').textContent = String(cantidad);
+    document.getElementById('resumen-repartidor-total').textContent = U.money(total);
+    box.classList.remove('hidden');
+  }
+
   function renderPedidos() {
     const tbody = document.getElementById('pedidos-tbody');
     if (!tbody) return;
     const list = filterPedidos();
+    updateRepartidorResumen(list);
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="7">Sin pedidos</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8">Sin pedidos en este filtro</td></tr>';
       return;
     }
     tbody.innerHTML = list.map(o => {
@@ -102,8 +164,26 @@
           <button class="admin-btn admin-btn-sm admin-btn-ghost" data-action="estado" data-id="${o.id}">Estado</button>
           <button class="admin-btn admin-btn-sm admin-btn-ghost" data-action="print" data-id="${o.id}">🖨️</button>
         </td>
+        <td>${repartidorSelectHtml(o.id, getRepartidor(o))}</td>
       </tr>`;
     }).join('');
+  }
+
+  async function assignRepartidor(orderId, nombre) {
+    const o = orders.find(x => x.id === orderId);
+    if (!o) return;
+    o.repartidor = nombre || '';
+    try {
+      await window.PollonOrders.updateOrderInBackend(o);
+      const local = window.PollonOrders.getOrders();
+      const idx = local.findIndex(x => x.id === orderId);
+      if (idx >= 0) local[idx].repartidor = o.repartidor;
+      toast(nombre ? `Repartidor: ${nombre}` : 'Repartidor sin asignar');
+      renderPedidos();
+    } catch (e) {
+      toast('Error al asignar repartidor');
+      renderPedidos();
+    }
   }
 
   function renderProductos() {
@@ -212,7 +292,7 @@
 
   function exportCsv() {
     const list = filterPedidos();
-    const rows = [['Codigo', 'Cliente', 'Telefono', 'Total', 'Estado', 'Fecha']];
+    const rows = [['Codigo', 'Cliente', 'Telefono', 'Total', 'Estado', 'Fecha', 'Repartidor']];
     list.forEach(o => {
       rows.push([
         o.codigo_pedido || o.id,
@@ -220,7 +300,8 @@
         o.customer?.phone,
         o.total,
         o.estado || o.status,
-        o.createdAt
+        o.createdAt,
+        getRepartidor(o) || ''
       ]);
     });
     const csv = rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -379,11 +460,17 @@
     const today = U.todayISO();
     document.getElementById('filtro-desde').value = today;
     document.getElementById('filtro-hasta').value = today;
-    ['filtro-desde', 'filtro-hasta', 'filtro-estado', 'filtro-buscar'].forEach(id => {
+    ['filtro-desde', 'filtro-hasta', 'filtro-hora-desde', 'filtro-hora-hasta',
+      'filtro-estado', 'filtro-repartidor', 'filtro-buscar'].forEach(id => {
       document.getElementById(id)?.addEventListener('change', renderPedidos);
       document.getElementById(id)?.addEventListener('input', renderPedidos);
     });
     document.getElementById('btn-export-csv')?.addEventListener('click', exportCsv);
+
+    document.getElementById('pedidos-tbody')?.addEventListener('change', e => {
+      const sel = e.target.closest('[data-repartidor-id]');
+      if (sel) assignRepartidor(sel.dataset.repartidorId, sel.value);
+    });
 
     document.getElementById('pedidos-tbody')?.addEventListener('click', e => {
       const btn = e.target.closest('[data-action]');

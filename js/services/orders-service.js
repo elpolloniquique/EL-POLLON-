@@ -43,7 +43,8 @@
       estado: row.estado,
       deliveredAt: row.entregado_en || null,
       orderType: row.tipo_entrega || 'delivery',
-      metodo_pago: row.metodo_pago
+      metodo_pago: row.metodo_pago,
+      repartidor: row.repartidor || datos.repartidor || ''
     };
   }
 
@@ -67,7 +68,8 @@
       datos_json: {
         customer: cust,
         items: order.items || [],
-        ticketNumber: order.ticketNumber
+        ticketNumber: order.ticketNumber,
+        repartidor: order.repartidor || ''
       }
     });
   }

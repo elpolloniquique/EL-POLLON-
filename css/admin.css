@@ -300,6 +300,116 @@ body.admin-body {
   box-shadow: 0 0 0 2px rgba(247, 127, 0, 0.2);
 }
 
+/* Pedidos — filtros, repartidor y resumen */
+.admin-pedidos-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.admin-pedidos-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: flex-end;
+  flex: 1;
+  min-width: 0;
+}
+.admin-pedidos-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.admin-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.admin-filter-field span {
+  font-size: 0.65rem;
+  color: var(--admin-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.admin-filter-field input,
+.admin-filter-select,
+.admin-filter-search {
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-size: 0.8rem;
+}
+.admin-filter-field--time input { min-width: 6.5rem; }
+.admin-filter-search { min-width: 180px; }
+
+.admin-repartidor-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 1rem;
+  border-radius: var(--admin-radius);
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+}
+.admin-repartidor-resumen.hidden { display: none; }
+.admin-repartidor-resumen__nombre {
+  flex: 0 0 auto;
+  min-width: 120px;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--admin-border);
+}
+.admin-repartidor-resumen__stat {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.6rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid var(--admin-border);
+  background: var(--admin-card);
+}
+.admin-repartidor-resumen__stat--total {
+  border-right: none;
+  background: linear-gradient(135deg, rgba(214, 40, 40, 0.2), rgba(247, 127, 0, 0.12));
+}
+.admin-repartidor-resumen__label {
+  font-size: 0.65rem;
+  color: var(--admin-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.admin-repartidor-resumen__value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 0.15rem;
+}
+.admin-repartidor-select {
+  min-width: 130px;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.admin-repartidor-select:focus {
+  outline: none;
+  border-color: rgba(247, 127, 0, 0.5);
+  box-shadow: 0 0 0 2px rgba(247, 127, 0, 0.15);
+}
+
 .pollon-toast {
   position: fixed;
   bottom: 1.5rem;

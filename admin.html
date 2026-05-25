@@ -53,35 +53,71 @@
       <!-- PEDIDOS -->
       <section id="sec-pedidos" class="admin-panel-section">
         <div class="admin-card">
-          <div style="display:flex;flex-wrap:gap:0.75rem;margin-bottom:1rem">
-            <input type="date" id="filtro-desde">
-            <input type="date" id="filtro-hasta">
-            <select id="filtro-estado">
-              <option value="">Todos los estados</option>
-              <option value="pendiente">Pendiente</option>
-              <option value="confirmado">Confirmado</option>
-              <option value="preparando">Preparando</option>
-              <option value="listo">Listo</option>
-              <option value="en_delivery">En delivery</option>
-              <option value="entregado">Entregado</option>
-              <option value="cancelado">Cancelado</option>
-            </select>
-            <input type="search" id="filtro-buscar" placeholder="Buscar cliente o teléfono">
-            <button type="button"
-                    id="admin-alarm-toggle"
-                    class="admin-btn admin-alarm-btn admin-alarm-btn--off"
-                    data-pollon-alarm-toggle
-                    aria-pressed="false"
-                    title="Suena 2 segundos cuando llega un pedido nuevo">
-              🔕 Activar alarma
-            </button>
-            <button type="button" class="admin-btn admin-btn-primary" id="btn-export-csv">Exportar CSV</button>
+          <div class="admin-pedidos-toolbar">
+            <div class="admin-pedidos-filters">
+              <label class="admin-filter-field">
+                <span>Desde</span>
+                <input type="date" id="filtro-desde">
+              </label>
+              <label class="admin-filter-field">
+                <span>Hasta</span>
+                <input type="date" id="filtro-hasta">
+              </label>
+              <label class="admin-filter-field admin-filter-field--time">
+                <span>Hora desde</span>
+                <input type="time" id="filtro-hora-desde" title="Filtrar pedidos desde esta hora">
+              </label>
+              <label class="admin-filter-field admin-filter-field--time">
+                <span>Hora hasta</span>
+                <input type="time" id="filtro-hora-hasta" title="Filtrar pedidos hasta esta hora">
+              </label>
+              <select id="filtro-estado" class="admin-filter-select" aria-label="Estado del pedido">
+                <option value="">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="preparando">Preparando</option>
+                <option value="listo">Listo</option>
+                <option value="en_delivery">En delivery</option>
+                <option value="entregado">Entregado</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+              <select id="filtro-repartidor" class="admin-filter-select" aria-label="Filtrar por repartidor">
+                <option value="">Repartidor — todos</option>
+                <option value="Eduardo">Eduardo</option>
+                <option value="Antony">Antony</option>
+                <option value="Mauriflax">Mauriflax</option>
+                <option value="JDN">JDN</option>
+              </select>
+              <input type="search" id="filtro-buscar" class="admin-filter-search" placeholder="Buscar cliente o teléfono">
+            </div>
+            <div class="admin-pedidos-actions">
+              <button type="button"
+                      id="admin-alarm-toggle"
+                      class="admin-btn admin-alarm-btn admin-alarm-btn--off"
+                      data-pollon-alarm-toggle
+                      aria-pressed="false"
+                      title="Suena 2 segundos cuando llega un pedido nuevo">
+                🔕 Activar alarma
+              </button>
+              <button type="button" class="admin-btn admin-btn-primary" id="btn-export-csv">Exportar CSV</button>
+            </div>
+          </div>
+          <div id="repartidor-resumen" class="admin-repartidor-resumen hidden" aria-live="polite">
+            <div class="admin-repartidor-resumen__nombre" id="resumen-repartidor-nombre">—</div>
+            <div class="admin-repartidor-resumen__stat">
+              <span class="admin-repartidor-resumen__label">Cantidad</span>
+              <span class="admin-repartidor-resumen__value" id="resumen-repartidor-cantidad">0</span>
+            </div>
+            <div class="admin-repartidor-resumen__stat admin-repartidor-resumen__stat--total">
+              <span class="admin-repartidor-resumen__label">Total</span>
+              <span class="admin-repartidor-resumen__value" id="resumen-repartidor-total">$0</span>
+            </div>
           </div>
           <div class="admin-table-wrap">
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>Código</th><th>Cliente</th><th>Teléfono</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
+                  <th>Código</th><th>Cliente</th><th>Teléfono</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th><th>Repartidor</th>
                 </tr>
               </thead>
               <tbody id="pedidos-tbody"></tbody>
