@@ -61,7 +61,7 @@
       tipo_entrega: order.orderType || 'delivery',
       metodo_pago: order.metodo_pago || 'whatsapp',
       total: order.total || 0,
-      estado: U ? U.estadoFromLegacy(order.status) : (order.estado || 'pendiente'),
+      estado: order.estado || (U ? U.estadoFromLegacy(order.status) : 'pendiente'),
       observaciones: cust.comments || order.observaciones || '',
       creado_en: order.createdAt || new Date().toISOString(),
       entregado_en: order.deliveredAt || null,
@@ -223,7 +223,43 @@
   }
 
   async function updateOrderInBackend(order) {
-    return addOrderToBackend(order);
+    if (!order?.id) return Promise.reject(new Error('Pedido inválido'));
+    const sb = window.PollonSupabase?.getClient?.();
+    if (!sb || !backendReady) {
+      const idx = orders.findIndex(o => o.id === order.id);
+      if (idx >= 0) orders[idx] = { ...orders[idx], ...order };
+      try {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      } catch (e) {
+        console.error(e);
+      }
+      return Promise.resolve();
+    }
+
+    if (tableMode === 'pedidos') {
+      const row = orderToPedido(order);
+      const { error } = await sb.from('pedidos').upsert(row, { onConflict: 'id' });
+      if (error) return Promise.reject(error);
+      const idx = orders.findIndex(o => o.id === order.id);
+      if (idx >= 0) orders[idx] = { ...orders[idx], ...order };
+      return;
+    }
+
+    const legacy = sanitize({
+      id: order.id,
+      created_at: order.createdAt,
+      ticket_number: order.ticketNumber,
+      customer: order.customer,
+      items: order.items,
+      total: order.total,
+      status: order.status,
+      delivered_at: order.deliveredAt,
+      order_type: order.orderType || 'delivery'
+    });
+    const { error } = await sb.from('orders').upsert(legacy, { onConflict: 'id' });
+    if (error) return Promise.reject(error);
+    const idx = orders.findIndex(o => o.id === order.id);
+    if (idx >= 0) orders[idx] = { ...orders[idx], ...order };
   }
 
   function isBackendReady() {

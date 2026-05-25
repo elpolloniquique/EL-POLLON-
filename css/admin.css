@@ -167,10 +167,38 @@ body.admin-body {
   font-size: 0.65rem;
   font-weight: 600;
 }
-.admin-badge-pendiente { background: #fef3c7; color: #92400e; }
-.admin-badge-preparando { background: #dbeafe; color: #1e40af; }
-.admin-badge-entregado { background: #d1fae5; color: #065f46; }
-.admin-badge-cancelado { background: #fee2e2; color: #991b1b; }
+.admin-badge-pendiente { background: #fef9c3; color: #854d0e; }
+.admin-badge-preparando { background: #dbeafe; color: #1d4ed8; }
+.admin-badge-en_delivery { background: #e9d5ff; color: #7e22ce; }
+.admin-badge-entregado { background: #d1fae5; color: #047857; }
+.admin-badge-cancelado { background: #fee2e2; color: #b91c1c; }
+
+.admin-badge-btn {
+  display: inline-block;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.admin-badge-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+}
+.admin-badge-btn:focus-visible {
+  outline: 2px solid rgba(247, 127, 0, 0.6);
+  outline-offset: 2px;
+}
+
+.admin-btn-estado {
+  border-color: rgba(247, 127, 0, 0.35);
+  color: #fcd34d;
+}
+.admin-btn-estado:hover {
+  background: rgba(247, 127, 0, 0.12);
+  border-color: rgba(247, 127, 0, 0.55);
+}
 
 .admin-form-grid {
   display: grid;

@@ -14,6 +14,21 @@
 
   const REPARTIDORES = ['Eduardo', 'Antony', 'Mauriflax', 'JDN'];
 
+  const ESTADOS_PEDIDO = ['pendiente', 'preparando', 'en_delivery', 'entregado', 'cancelado'];
+  const ESTADO_LABEL = {
+    pendiente: 'Pendiente',
+    preparando: 'Preparando',
+    en_delivery: 'En delivery',
+    entregado: 'Entregado',
+    cancelado: 'Cancelado'
+  };
+  const ESTADO_ALIAS = {
+    confirmado: 'preparando',
+    listo: 'preparando',
+    'en preparación': 'preparando',
+    'en preparacion': 'preparando'
+  };
+
   const NAV = [
     { id: 'dashboard', label: '📊 Dashboard', perm: 'dashboard', title: 'Dashboard' },
     { id: 'pedidos', label: '🛒 Pedidos', perm: 'orders', title: 'Pedidos' },
@@ -30,11 +45,32 @@
     U.toast(msg);
   }
 
+  function normalizeEstado(estado) {
+    if (!estado) return 'pendiente';
+    const raw = String(estado).trim().toLowerCase().replace(/\s+/g, '_');
+    if (ESTADO_ALIAS[raw]) return ESTADO_ALIAS[raw];
+    if (ESTADOS_PEDIDO.includes(raw)) return raw;
+    const fromLegacy = U.estadoFromLegacy(estado);
+    if (ESTADOS_PEDIDO.includes(fromLegacy)) return fromLegacy;
+    if (ESTADO_ALIAS[fromLegacy]) return ESTADO_ALIAS[fromLegacy];
+    return 'pendiente';
+  }
+
+  function getOrderEstado(o) {
+    return normalizeEstado(o.estado || o.status);
+  }
+
+  function nextEstadoPedido(current) {
+    const cur = normalizeEstado(current);
+    const idx = ESTADOS_PEDIDO.indexOf(cur);
+    const i = idx >= 0 ? idx : 0;
+    return ESTADOS_PEDIDO[(i + 1) % ESTADOS_PEDIDO.length];
+  }
+
   function badgeEstado(estado) {
-    const e = (estado || 'pendiente').toLowerCase();
-    const cls = ['entregado', 'cancelado', 'preparando', 'pendiente'].includes(e)
-      ? `admin-badge-${e === 'en_delivery' ? 'preparando' : e}` : 'admin-badge-pendiente';
-    return `<span class="admin-badge ${cls}">${e}</span>`;
+    const e = normalizeEstado(estado);
+    const label = ESTADO_LABEL[e] || e;
+    return `<span class="admin-badge admin-badge-${e}">${label}</span>`;
   }
 
   async function loadOrders() {
@@ -113,7 +149,7 @@
       if (desde && d < desde) return false;
       if (hasta && d > hasta) return false;
       if (!orderMatchesHourRange(o.createdAt, horaDesde, horaHasta)) return false;
-      const est = o.estado || U.estadoFromLegacy(o.status);
+      const est = getOrderEstado(o);
       if (estado && est !== estado) return false;
       if (repartidor && getRepartidor(o) !== repartidor) return false;
       if (q) {
@@ -152,16 +188,20 @@
     }
     tbody.innerHTML = list.map(o => {
       const c = o.customer || {};
-      const est = o.estado || U.estadoFromLegacy(o.status);
+      const est = getOrderEstado(o);
       return `<tr>
         <td>${o.codigo_pedido || o.ticketNumber || o.id}</td>
         <td>${c.name || '-'}</td>
         <td>${c.phone || '-'}</td>
         <td>${U.money(o.total)}</td>
-        <td>${badgeEstado(est)}</td>
+        <td>
+          <button type="button" class="admin-badge-btn" data-action="estado" data-id="${o.id}" title="Cambiar a: ${ESTADO_LABEL[nextEstadoPedido(est)]}">
+            ${badgeEstado(est)}
+          </button>
+        </td>
         <td>${U.formatDateTime(o.createdAt)}</td>
         <td>
-          <button class="admin-btn admin-btn-sm admin-btn-ghost" data-action="estado" data-id="${o.id}">Estado</button>
+          <button type="button" class="admin-btn admin-btn-sm admin-btn-ghost admin-btn-estado" data-action="estado" data-id="${o.id}" title="Cambiar estado: ${ESTADO_LABEL[nextEstadoPedido(est)]}">Estado</button>
           <button class="admin-btn admin-btn-sm admin-btn-ghost" data-action="print" data-id="${o.id}">🖨️</button>
         </td>
         <td>${repartidorSelectHtml(o.id, getRepartidor(o))}</td>
@@ -218,10 +258,10 @@
     const pedidosHoy = orders.filter(o => (o.createdAt || '').startsWith(today));
     const ventasHoy = pedidosHoy.reduce((s, o) => s + (o.total || 0), 0);
     const pendientes = orders.filter(o => {
-      const e = o.estado || U.estadoFromLegacy(o.status);
-      return e === 'pendiente' || e === 'confirmado' || e === 'preparando';
+      const e = getOrderEstado(o);
+      return e === 'pendiente' || e === 'preparando' || e === 'en_delivery';
     }).length;
-    const entregados = orders.filter(o => (o.estado || U.estadoFromLegacy(o.status)) === 'entregado').length;
+    const entregados = orders.filter(o => getOrderEstado(o) === 'entregado').length;
     const ticket = orders.length ? orders.reduce((s, o) => s + o.total, 0) / orders.length : 0;
     return {
       total: orders.length,
@@ -257,7 +297,7 @@
 
     const estados = {};
     orders.forEach(o => {
-      const e = o.estado || U.estadoFromLegacy(o.status) || 'pendiente';
+      const e = getOrderEstado(o);
       estados[e] = (estados[e] || 0) + 1;
     });
     window.PollonCharts.createDoughnut('chart-estados', Object.keys(estados), Object.values(estados));
@@ -276,17 +316,31 @@
   async function changeEstado(id) {
     const o = orders.find(x => x.id === id);
     if (!o) return;
-    const cur = o.estado || U.estadoFromLegacy(o.status);
-    const next = U.nextEstado(cur);
+    const cur = getOrderEstado(o);
+    const next = nextEstadoPedido(cur);
     o.estado = next;
-    o.status = U.estadoToLegacy(next);
-    if (next === 'entregado') o.deliveredAt = new Date().toISOString();
+    o.status = next;
+    if (next === 'entregado') {
+      o.deliveredAt = new Date().toISOString();
+    } else if (cur === 'entregado') {
+      o.deliveredAt = null;
+    }
     try {
       await window.PollonOrders.updateOrderInBackend(o);
-      toast('Estado: ' + next);
-      await refresh();
+      const local = window.PollonOrders.getOrders();
+      const idx = local.findIndex(x => x.id === id);
+      if (idx >= 0) {
+        local[idx].estado = next;
+        local[idx].status = next;
+        local[idx].deliveredAt = o.deliveredAt;
+      }
+      toast(`Estado: ${ESTADO_LABEL[next]}`);
+      renderPedidos();
+      renderDashboard();
     } catch (e) {
-      toast('Error al actualizar');
+      console.warn(e);
+      toast('Error al actualizar estado');
+      await refresh();
     }
   }
 
@@ -299,7 +353,7 @@
         o.customer?.name,
         o.customer?.phone,
         o.total,
-        o.estado || o.status,
+        ESTADO_LABEL[getOrderEstado(o)] || getOrderEstado(o),
         o.createdAt,
         getRepartidor(o) || ''
       ]);
@@ -476,7 +530,7 @@
       const btn = e.target.closest('[data-action]');
       if (!btn) return;
       const id = btn.dataset.id;
-      if (btn.dataset.action === 'estado') changeEstado(id);
+      if (btn.dataset.action === 'estado') changeEstado(id).catch(() => {});
       if (btn.dataset.action === 'print') {
         const o = orders.find(x => x.id === id);
         if (o) window.PollonTickets.print(o);
